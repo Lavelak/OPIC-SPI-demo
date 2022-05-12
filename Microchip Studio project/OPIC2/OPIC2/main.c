@@ -82,6 +82,8 @@ uint8_t cam_reg_array[34][3] = {
 
 int opic_spi_write_reg(struct io_descriptor *io, uint8_t* cmd_addr_data);
 
+int opic_spi_read_reg(struct io_descriptor *io, uint8_t* cmd_addr_data, uint8_t* data_out);
+
 int opic_spi_read_sdram_word(struct io_descriptor *io, uint8_t query_addr, uint8_t* tgt1, uint8_t* tgt2);
 
 int opic_clear_sdram(struct io_descriptor *io);
@@ -104,6 +106,10 @@ int main(void)
 
 	
 	delay_ms(1000);
+	
+	uint8_t vearsion_reg[3] = {0x92, 0x00, 0x00};
+	uint8_t version[1];
+	opic_spi_read_reg(io, vearsion_reg, version);
 	
 	// sends Clear SDRAM command
 	int r = opic_clear_sdram(io);
@@ -195,6 +201,19 @@ int opic_spi_write_reg(struct io_descriptor *io, uint8_t* cmd_addr_data){
 	if (!(comp1 && comp2)){
 		return -1;
 	}
+	return 0;
+}
+
+int opic_spi_read_reg(struct io_descriptor *io, uint8_t* cmd_addr_data, uint8_t* data_out){
+	uint8_t spoof[8];
+	io_write(io, cmd_addr_data, 3);
+	io_read(io, spoof, 3);
+	int comp1 = spoof[0] == cmd_addr_data[1];
+	int comp2 = spoof[1] == cmd_addr_data[2];
+	if (!(comp1 && comp2)){
+		return -1;
+	}
+	*data_out = spoof[2];
 	return 0;
 }
 
