@@ -44,7 +44,8 @@ uint8_t cam_reg_frame2[24][3] = {
 int CAM_ARRAY_LEN = 34;
 uint8_t cam_reg_array[34][3] = {
 	{0x93, 0x22, 0x09},
-	{0x93, 0x01, 0x58},
+	{0x93, 0x01, 0x58},	  // capture test image
+	//{0x93, 0x01, 0x48}, // capture image 
 	{0x9b, 0x71, 0x00},
 	{0x9b, 0x73, 0x01},
 	{0x9b, 0x72, 0x03},
@@ -90,14 +91,6 @@ int opic_config_picture(struct io_descriptor *io);
 int opic_take_picture(struct io_descriptor *io);
 
 int opic_stream_frame(struct io_descriptor *io);
-
-
-
-
-
-
-
-
 
 
 int main(void)
@@ -193,27 +186,6 @@ int main(void)
 	}
 }
 
-int opic_stream_frame(struct io_descriptor *io){
-	delay_ms(200);
-	uint8_t spoof[8];
-	uint8_t header[28*2];
-	uint8_t frame[100];
-	//start streaming command
-	uint8_t stream_reg[3] = {0x84, 0x00, 0x00};
-	uint8_t stop_stream_reg[3] = {0x80, 0x00, 0x00};
-	delay_ms(200);
-	io_write(io, stream_reg, 3);
-	delay_ms(200);
-	io_read(io, header, 28*2);
-	delay_ms(200);
-	io_read(io, frame, 100);
-	delay_ms(200);
-	// stop streaming command
-	io_write(io, stop_stream_reg, 3);
-	
-	return 0;
-}
-
 int opic_spi_write_reg(struct io_descriptor *io, uint8_t* cmd_addr_data){
 	uint8_t spoof[8];
 	io_write(io, cmd_addr_data, 3);
@@ -283,7 +255,6 @@ int opic_config_picture(struct io_descriptor *io){
 }
 
 
-
 int opic_take_picture(struct io_descriptor *io){
 	uint8_t shoot_reg[3] = {0x93, 0x07, 0x01};
 	int r = opic_spi_write_reg(io, shoot_reg);
@@ -293,3 +264,23 @@ int opic_take_picture(struct io_descriptor *io){
 	return 0;
 }
 
+int opic_stream_frame(struct io_descriptor *io){
+	delay_ms(200);
+	uint8_t spoof[8];
+	uint8_t header[28*2];
+	uint8_t frame[100];
+	//start streaming command
+	uint8_t stream_reg[3] = {0x84, 0x00, 0x00};
+	uint8_t stop_stream_reg[3] = {0x80, 0x00, 0x00};
+	delay_ms(200);
+	io_write(io, stream_reg, 3);
+	delay_ms(200);
+	io_read(io, header, 28*2);
+	delay_ms(200);
+	io_read(io, frame, 100);
+	delay_ms(200);
+	// stop streaming command
+	io_write(io, stop_stream_reg, 3);
+	
+	return 0;
+}
